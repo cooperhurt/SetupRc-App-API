@@ -10,6 +10,7 @@ const app = require("express")();
 const server = require("http").createServer(app);
 dotenv.config();
 
+/* TODO implement GraphQL stuff
 // GraphQL Schema
 var schema = buildSchema(`
     type Query {
@@ -17,20 +18,21 @@ var schema = buildSchema(`
     }
 `);
 
-// Root resolver
+//Root resolver
 var root = {
     message: () => "Hello Wold!",
 };
 
-// GraphQL Endpoings
-// app.use(
-//     "/graphql",
-//     express_graphql({
-//         schema: schema,
-//         rootValue: root,
-//         graphiql: true,
-//     })
-// );
+//GraphQL Endpoints
+app.use(
+    "/graphql",
+    express_graphql({
+        schema: schema,
+        rootValue: root,
+        graphiql: true,
+    })
+);
+*/
 
 // API setup
 app.use(cors({ origin: true, credentials: true }));
@@ -44,17 +46,17 @@ mongoose.set("useFindAndModify", true);
 
 const connectToDatabase = async () => {
     try {
-        mongoose.connect(process.env.DATABASEURL!, {
+        await mongoose.connect(process.env.DATABASEURL!, {
             useFindAndModify: true,
             useUnifiedTopology: true,
             useNewUrlParser: true,
         });
         app.set("db", process.env.DATABASEUR);
+        console.log(`Database connected at ${process.env.DATABASEURL!}`);
     } catch (err) {
         // To some kind of error handling here
     }
 };
-connectToDatabase();
 
 // This will require the schemas for the database and it can reference the stuff
 require("./models");
@@ -63,6 +65,8 @@ const router = express.Router();
 
 // Route/API endpoints
 import routes from "./routes";
+import setup from "./routes/setups";
+router.use("/setups", setup);
 router.use("/", routes);
 
 // Do some kind of route authoriation here
@@ -71,7 +75,8 @@ router.use("/", routes);
 //Setup the server
 app.use("/api", router);
 
-app.listen(8080, () => {
+app.listen(8080, async () => {
+    await connectToDatabase();
     console.log("Normal  api: localhost:8080/api");
     console.log("GraphQL api: localhost:8080/graphql");
 });
