@@ -3,36 +3,42 @@ import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-var express_graphql = require("express-graphql");
+import serverless from "serverless-http";
+import { graphqlHTTP } from "express-graphql";
+// var { graphqlHTTP } = require("express-graphql");
 var { buildSchema } = require("graphql");
 
 const app = require("express")();
 const server = require("http").createServer(app);
 dotenv.config();
 
-/* TODO implement GraphQL stuff
 // GraphQL Schema
 var schema = buildSchema(`
     type Query {
         message: String
     }
+    
+    input Brand {
+        Active: Boolean!
+        Name: String!
+        Cars: [String!]!
+    }
 `);
-
-//Root resolver
-var root = {
-    message: () => "Hello Wold!",
-};
 
 //GraphQL Endpoints
 app.use(
     "/graphql",
-    express_graphql({
+    graphqlHTTP({
         schema: schema,
-        rootValue: root,
+        rootValue: {
+            events: () => {
+                return "";
+            },
+            createEvent: (args: any) => {},
+        },
         graphiql: true,
     })
 );
-*/
 
 // API setup
 app.use(cors({ origin: true, credentials: true }));
@@ -54,7 +60,7 @@ const connectToDatabase = async () => {
         app.set("db", process.env.DATABASEUR);
         console.log(`Database connected at ${process.env.DATABASEURL!}`);
     } catch (err) {
-        // To some kind of error handling here
+        console.log("Error connecting to database", err)
     }
 };
 
@@ -82,3 +88,4 @@ app.listen(8080, async () => {
 });
 
 export default { server, app };
+module.exports.handler = serverless(app);
