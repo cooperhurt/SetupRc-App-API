@@ -3,11 +3,11 @@ import { SetupModel } from "../models/setups";
 
 const router = express.Router();
 
-// This is recommended to
 router
     .route("/")
     // This route will return all setups from the application that are currently active
     .get(async (req, res) => {
+        //TODO setup pagination
         const setups = await SetupModel.find({ Active: true }).lean();
         return res.status(200).json({ setups: setups });
     })
