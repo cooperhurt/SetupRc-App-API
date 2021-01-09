@@ -1,56 +1,54 @@
 import express from "express";
-import { CarModel } from "../models";
+import { SetupModel } from "../models/setups";
 
 const router = express.Router();
 
 // This is recommended to
 router
     .route("/")
+    // This route will return all setups from the application that are currently active
     .get(async (req, res) => {
-        return res.status(200).json({
-            entity: [
-                {
-                    title: "Florida Carpet Nationals",
-                    driverName: "Spencer Rivkin",
-                    image:
-                        "https://blog.jconcepts.net/wp-content/uploads/2019/11/Beachline-track.jpg",
-                    price: 0,
-                    horizontal: true,
-                },
-                {
-                    title: "Reedy Race of Champions",
-                    driverName: "Dustin Evans",
-                    image:
-                        "https://www.ocrcraceway.com/img/race-events/race-events-header-1.png",
-                    price: 220,
-                },
-                {
-                    title: "Tacoma Nationals",
-                    driverName: "Spencer Rivkin",
-                    image:
-                        "https://static1.squarespace.com/static/5e2235f2e5db866dd930067b/5e36080b12092f15874c4e86/5e50a2ac643db018c8596a39/1598630545032/Tacoma.jpg?format=1500w",
-                    price: 40,
-                },
-                {
-                    title: "Internet of Things (IoT) is Here to Stay",
-                    driverName: "Spencer Rivkin",
-                    image: "https://source.unsplash.com/I7BSOoPa5hM/840x840",
-                    price: 188,
-                    horizontal: true,
-                },
-                {
-                    title: "Coffee - A Drop of Happiness in a Cup",
-                    driverName: "Spencer Rivkin",
-                    image: "https://source.unsplash.com/Ws4wd-vJ9M0/840x840",
-                    price: 180,
-                },
-            ],
-        });
+        const setups = await SetupModel.find({ Active: true }).lean();
+        return res.status(200).json({ setups: setups });
     })
     .post(async (req, res) => {
+        // We probably will want to sanitize this
         const setup = req.body;
-        await CarModel.insertMany(setup);
-        return res.status(200).json({});
+        try {
+            const createdSetup = await SetupModel.create(setup);
+            return res.status(200).json({ setup: createdSetup });
+        } catch (err) {
+            return res.status(400).json({
+                message: "Error occured during posting of setup",
+                error: err,
+            });
+        }
+    });
+
+router
+    .route("/:id")
+    .get(async (req, res) => {
+        const { id } = req.params;
+        const setup = await SetupModel.find({ Active: true, _id: id }).lean();
+        return res.status(200).json({ setup: setup });
+    })
+    .put(async (req, res) => {
+        const { id } = req.params;
+        const setup = req.body;
+
+        try {
+            const updateSetup = await SetupModel.findOneAndUpdate(
+                { Active: true, _id: id },
+                setup,
+                { new: true }
+            ).lean();
+            return res.status(200).json({ setup: updateSetup });
+        } catch (err) {
+            return res.status(400).json({
+                message: "Error occured during updating the setup",
+                error: err,
+            });
+        }
     });
 
 export default router;

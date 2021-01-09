@@ -48,19 +48,19 @@ app.use(bodyParser.json({ limit: "10mb" }));
 // Mongoose setup
 mongoose.set("useUnifiedTopology", true);
 mongoose.set("useCreateIndex", true);
-mongoose.set("useFindAndModify", true);
+mongoose.set("useFindAndModify", false);
 
 const connectToDatabase = async () => {
     try {
         await mongoose.connect(process.env.DATABASEURL!, {
-            useFindAndModify: true,
+            useFindAndModify: false,
             useUnifiedTopology: true,
             useNewUrlParser: true,
         });
         app.set("db", process.env.DATABASEUR);
         console.log(`Database connected at ${process.env.DATABASEURL!}`);
     } catch (err) {
-        console.log("Error connecting to database", err)
+        console.log("Error connecting to database", err);
     }
 };
 
@@ -72,7 +72,14 @@ const router = express.Router();
 // Route/API endpoints
 import routes from "./routes";
 import setup from "./routes/setups";
+import car from "./routes/cars";
+import track from "./routes/tracks";
+import user from "./routes/user";
+
 router.use("/setups", setup);
+router.use("/car", car);
+router.use("/track", track);
+router.use("/user", user);
 router.use("/", routes);
 
 // Do some kind of route authoriation here

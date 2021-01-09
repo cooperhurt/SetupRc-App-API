@@ -13,4 +13,15 @@ router
         return res.status(200).json({});
     });
 
+router
+    .route("/:id")
+    .get(async (req, res) => {
+        //TODO implement this
+        return res.status(200).json({});
+    })
+    .post(async (req, res) => {
+        //TODO implement this
+        return res.status(200).json({});
+    });
+
 export default router;
