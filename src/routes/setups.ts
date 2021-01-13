@@ -8,7 +8,7 @@ router
     // This route will return all setups from the application that are currently active
     .get(async (req, res) => {
         //TODO setup pagination
-        const setups = await SetupModel.find({ Active: true }).lean();
+        const setups = await SetupModel.find({ Active: true }).lean({ autopopulate: true });
         return res.status(200).json({ setups: setups });
     })
     .post(async (req, res) => {
